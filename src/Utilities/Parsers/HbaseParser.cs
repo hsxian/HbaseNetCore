@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Newtonsoft.Json;
 using Utilities.Attributes;
 using Utilities.Converts;
 
@@ -48,7 +49,10 @@ namespace Utilities.Parsers
                 {
                     mut.Value = fd.GetValue(obj).ToUTF8Bytes();
                 }
-                result.Add(mut);
+                if (mut.Value.ToUTF8String() != "null")
+                {
+                    result.Add(mut);
+                }
             }
             return result;
         }
@@ -62,6 +66,7 @@ namespace Utilities.Parsers
                 .ToList();
 
             var hcaType = typeof(HbaseColumnAttribute);
+            var strType = typeof(string);
 
             var dict = trr.Columns.ToDictionary(t => t.Key.ToUTF8String());
 
@@ -85,12 +90,23 @@ namespace Utilities.Parsers
                     var vlaueStr = tCell.Value.Value.ToUTF8String();
                     if (fp is PropertyInfo pp)
                     {
-                        object v = Convert.ChangeType(vlaueStr, pp.PropertyType);
+                        object v = vlaueStr;
+                        if (pp.PropertyType != strType)
+                        {
+                            v = JsonConvert.DeserializeObject(vlaueStr, pp.PropertyType);
+                        }
+
+                        // object v = Convert.ChangeType(vlaueStr, pp.PropertyType);
                         pp.SetValue(real, v);
                     }
                     else if (fp is FieldInfo fd)
                     {
-                        object v = Convert.ChangeType(vlaueStr, fd.FieldType);
+                        object v = vlaueStr;
+                        if (fd.FieldType != strType)
+                        {
+                            v = JsonConvert.DeserializeObject(vlaueStr, fd.FieldType);
+                        }
+                        // object v = Convert.ChangeType(vlaueStr, fd.FieldType);
                         fd.SetValue(real, v);
                     }
                 }

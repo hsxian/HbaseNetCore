@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Utilities.Attributes;
 using Utilities.Converts;
@@ -14,7 +15,10 @@ namespace HbaseNetCore
         [HbaseColumn]
         public int Age { get; set; }
         [HbaseColumn]
-        public bool isWork;
+        public bool? isWork;
+        public DateTime JoinSchool { get; set; }
+        [HbaseColumn]
+        public List<string> Hobbies { get; set; }
     }
     public class HbaseParserTest
     {

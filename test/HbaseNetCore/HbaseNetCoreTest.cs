@@ -118,18 +118,24 @@ namespace HbaseNetCore
             var cancel = new CancellationToken();
 
             var range = Enumerable.Range(0, 100).ToList();
-            var batchs = range
+            var students = range
+                .Select(t => new { Id = t, stu = new Student { Name = $"hsx{t}", Age = t } })
+                .ToList();
+
+            students.Last().stu.Hobbies = new List<string> { "running", "dance" };
+            students.Last().stu.isWork = true;
+
+            var batchs = students
                 .Select(t => new BatchMutation
                 {
-                    Row = t.ToUTF8Bytes(),
-                    Mutations = HbaseParser.ToMutations(new Student { Name = $"hsx{t}", Age = t })
+                    Row = t.Id.ToUTF8Bytes(),
+                    Mutations = HbaseParser.ToMutations(t.stu)
                 })
-                .ToList()
-                ;
+                .ToList();
 
             await _client.mutateRowsAsync(_table.ToUTF8Bytes(), batchs, null, cancel);
 
-            var students = (await _client.getRowsAsync(
+            var studentsFromHb = (await _client.getRowsAsync(
                 _table.ToUTF8Bytes(),
                 range.Select(t => t.ToUTF8Bytes()).ToList(),
                 null,
@@ -137,9 +143,11 @@ namespace HbaseNetCore
                 .Select(t => HbaseParser.ToReal<Student>(t))
                 .ToList();
 
-            Assert.Equal(students.Count, range.Count());
-            Assert.Equal(students.Last().Name, $"hsx{range.Last()}");
-            Assert.Equal(students.Last().Age, range.Last());
+            Assert.Equal(studentsFromHb.Count, range.Count());
+            Assert.Equal(studentsFromHb.Last().Name, $"hsx{range.Last()}");
+            Assert.Equal(studentsFromHb.Last().Age, range.Last());
+            Assert.Equal(studentsFromHb.Last().isWork, true);
+            Assert.Contains(studentsFromHb.Last().Hobbies, t => t == "running");
 
             _clientTransport.Close();
         }

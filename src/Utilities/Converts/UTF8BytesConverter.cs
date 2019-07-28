@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Utilities.Converts
 {
@@ -9,7 +10,12 @@ namespace Utilities.Converts
         #region object
         public static byte[] ToUTF8Bytes(this object @this)
         {
-            return Encoding.UTF8.GetBytes(@this.ToString());
+            if (@this is string str)
+            {
+                return Encoding.UTF8.GetBytes(str);
+            }
+            var json = JsonConvert.SerializeObject(@this);
+            return Encoding.UTF8.GetBytes(json);
         }
 
         public static string ToUTF8String(this byte[] @this)
