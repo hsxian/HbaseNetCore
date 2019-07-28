@@ -67,7 +67,7 @@ namespace HbaseNetCore
                         new Mutation
                         {
                             Column="info:name".ToUTF8Bytes(),
-                            Value="2好l熟悉".ToUTF8Bytes()
+                            Value="好l熟悉".ToUTF8Bytes()
                         },
                         new Mutation
                         {
