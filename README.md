@@ -11,6 +11,8 @@ cd $HBASE_HOME
 
 ## Gen Hbase.thrift
 
+thrift version=0.11.0
+
 ```bash
 thrift --gen netcore Hbase.thrift
 ```
