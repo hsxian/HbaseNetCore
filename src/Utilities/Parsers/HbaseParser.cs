@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Utilities.Attributes;
@@ -8,9 +9,9 @@ namespace Utilities.Parsers
 {
     public class HbaseParser
     {
-        public static Mutation ToMutation(object obj)
+        public static List<Mutation> ToMutations(object obj)
         {
-            var mut = new Mutation();
+            var result = new List<Mutation>();
             var type = obj.GetType();
 
             var fps = type.GetMembers()
@@ -33,7 +34,11 @@ namespace Utilities.Parsers
                 {
                     column = fp.Name;
                 }
-                mut.Column = $"{family}:{column}".ToUTF8Bytes();
+
+                var mut = new Mutation
+                {
+                    Column = $"{family}:{column}".ToUTF8Bytes()
+                };
 
                 if (fp is PropertyInfo pp)
                 {
@@ -43,8 +48,9 @@ namespace Utilities.Parsers
                 {
                     mut.Value = fd.GetValue(obj).ToUTF8Bytes();
                 }
+                result.Add(mut);
             }
-            return mut;
+            return result;
         }
 
         public static T ToReal<T>(TRowResult trr) where T : class, new()

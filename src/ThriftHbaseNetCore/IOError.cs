@@ -30,114 +30,114 @@ using Thrift.Transports.Server;
 /// </summary>
 public partial class IOError : TException, TBase
 {
-  private string _message;
+    private string _message;
 
-  public string Message
-  {
-    get
+    public new string Message
     {
-      return _message;
-    }
-    set
-    {
-      __isset.message = true;
-      this._message = value;
-    }
-  }
-
-
-  public Isset __isset;
-  public struct Isset
-  {
-    public bool message;
-  }
-
-  public IOError()
-  {
-  }
-
-  public async Task ReadAsync(TProtocol iprot, CancellationToken cancellationToken)
-  {
-    iprot.IncrementRecursionDepth();
-    try
-    {
-      TField field;
-      await iprot.ReadStructBeginAsync(cancellationToken);
-      while (true)
-      {
-        field = await iprot.ReadFieldBeginAsync(cancellationToken);
-        if (field.Type == TType.Stop)
+        get
         {
-          break;
+            return _message;
         }
-
-        switch (field.ID)
+        set
         {
-          case 1:
-            if (field.Type == TType.String)
-            {
-              Message = await iprot.ReadStringAsync(cancellationToken);
-            }
-            else
-            {
-              await TProtocolUtil.SkipAsync(iprot, field.Type, cancellationToken);
-            }
-            break;
-          default: 
-            await TProtocolUtil.SkipAsync(iprot, field.Type, cancellationToken);
-            break;
+            __isset.message = true;
+            this._message = value;
         }
+    }
 
-        await iprot.ReadFieldEndAsync(cancellationToken);
-      }
 
-      await iprot.ReadStructEndAsync(cancellationToken);
-    }
-    finally
+    public Isset __isset;
+    public struct Isset
     {
-      iprot.DecrementRecursionDepth();
+        public bool message;
     }
-  }
 
-  public async Task WriteAsync(TProtocol oprot, CancellationToken cancellationToken)
-  {
-    oprot.IncrementRecursionDepth();
-    try
+    public IOError()
     {
-      var struc = new TStruct("IOError");
-      await oprot.WriteStructBeginAsync(struc, cancellationToken);
-      var field = new TField();
-      if (Message != null && __isset.message)
-      {
-        field.Name = "message";
-        field.Type = TType.String;
-        field.ID = 1;
-        await oprot.WriteFieldBeginAsync(field, cancellationToken);
-        await oprot.WriteStringAsync(Message, cancellationToken);
-        await oprot.WriteFieldEndAsync(cancellationToken);
-      }
-      await oprot.WriteFieldStopAsync(cancellationToken);
-      await oprot.WriteStructEndAsync(cancellationToken);
     }
-    finally
-    {
-      oprot.DecrementRecursionDepth();
-    }
-  }
 
-  public override string ToString()
-  {
-    var sb = new StringBuilder("IOError(");
-    bool __first = true;
-    if (Message != null && __isset.message)
+    public async Task ReadAsync(TProtocol iprot, CancellationToken cancellationToken)
     {
-      if(!__first) { sb.Append(", "); }
-      __first = false;
-      sb.Append("Message: ");
-      sb.Append(Message);
+        iprot.IncrementRecursionDepth();
+        try
+        {
+            TField field;
+            await iprot.ReadStructBeginAsync(cancellationToken);
+            while (true)
+            {
+                field = await iprot.ReadFieldBeginAsync(cancellationToken);
+                if (field.Type == TType.Stop)
+                {
+                    break;
+                }
+
+                switch (field.ID)
+                {
+                    case 1:
+                        if (field.Type == TType.String)
+                        {
+                            Message = await iprot.ReadStringAsync(cancellationToken);
+                        }
+                        else
+                        {
+                            await TProtocolUtil.SkipAsync(iprot, field.Type, cancellationToken);
+                        }
+                        break;
+                    default:
+                        await TProtocolUtil.SkipAsync(iprot, field.Type, cancellationToken);
+                        break;
+                }
+
+                await iprot.ReadFieldEndAsync(cancellationToken);
+            }
+
+            await iprot.ReadStructEndAsync(cancellationToken);
+        }
+        finally
+        {
+            iprot.DecrementRecursionDepth();
+        }
     }
-    sb.Append(")");
-    return sb.ToString();
-  }
+
+    public async Task WriteAsync(TProtocol oprot, CancellationToken cancellationToken)
+    {
+        oprot.IncrementRecursionDepth();
+        try
+        {
+            var struc = new TStruct("IOError");
+            await oprot.WriteStructBeginAsync(struc, cancellationToken);
+            var field = new TField();
+            if (Message != null && __isset.message)
+            {
+                field.Name = "message";
+                field.Type = TType.String;
+                field.ID = 1;
+                await oprot.WriteFieldBeginAsync(field, cancellationToken);
+                await oprot.WriteStringAsync(Message, cancellationToken);
+                await oprot.WriteFieldEndAsync(cancellationToken);
+            }
+            await oprot.WriteFieldStopAsync(cancellationToken);
+            await oprot.WriteStructEndAsync(cancellationToken);
+        }
+        finally
+        {
+            oprot.DecrementRecursionDepth();
+        }
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder("IOError(");
+        bool __first = true;
+        if (Message != null && __isset.message)
+        {
+            if (!__first) { sb.Append(", "); }
+            __first = false;
+            sb.Append("Message: ");
+            sb.Append(Message);
+        }
+        sb.Append(")");
+        return sb.ToString();
+    }
 }
 

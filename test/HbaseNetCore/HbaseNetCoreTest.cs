@@ -11,6 +11,8 @@ using Xunit;
 using static Hbase;
 using Utilities.Converts;
 using System.Linq;
+using Utilities.Parsers;
+using Utilities.Attributes;
 
 namespace HbaseNetCore
 {
@@ -19,7 +21,7 @@ namespace HbaseNetCore
         private readonly TClientTransport _clientTransport;
         private readonly IAsync _client;
         private readonly string _table = "student";
-        private readonly List<string> _tableOfCols = new List<string> { "info" };
+        private readonly List<string> _tableOfCols = new List<string> { HbaseColumnAttribute.DefaultFamily };
         public HbaseNetCoreTest()
         {
             _clientTransport = new TSocketClientTransport(IPAddress.Loopback, 9090);
@@ -27,7 +29,7 @@ namespace HbaseNetCore
             _client = new Hbase.Client(protocol);
 
         }
-        [Fact]
+        [Fact(DisplayName = "1.创建表")]
         public async void CreateTableTest()
         {
             await _clientTransport.OpenAsync();
@@ -46,11 +48,11 @@ namespace HbaseNetCore
 
             tables = await _client.getTableNamesAsync(cancel);
 
-            Assert.True(tables.Select(t => t.ToUTF8String()).Contains(_table));
+            Assert.Contains(tables, t => t.ToUTF8String() == _table);
 
             _clientTransport.Close();
         }
-        [Fact]
+        [Fact(DisplayName = "2.写入数据")]
         public async void WriteDataTest()
         {
             await _clientTransport.OpenAsync();
@@ -66,17 +68,17 @@ namespace HbaseNetCore
                     {
                         new Mutation
                         {
-                            Column="info:name".ToUTF8Bytes(),
+                            Column=$"{HbaseColumnAttribute.DefaultFamily}:name".ToUTF8Bytes(),
                             Value="好l熟悉".ToUTF8Bytes()
                         },
                         new Mutation
                         {
-                            Column="info:height".ToUTF8Bytes(),
+                            Column=$"{HbaseColumnAttribute.DefaultFamily}:height".ToUTF8Bytes(),
                             Value=166.ToUTF8Bytes()
                         },
                         new Mutation
                         {
-                            Column="info:isWork".ToUTF8Bytes(),
+                            Column=$"{HbaseColumnAttribute.DefaultFamily}:isWork".ToUTF8Bytes(),
                             Value=true.ToUTF8Bytes()
                         },
                     }
@@ -89,7 +91,7 @@ namespace HbaseNetCore
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "3.读取数据")]
         public async void ReadDataTest()
         {
             await _clientTransport.OpenAsync();
@@ -105,6 +107,40 @@ namespace HbaseNetCore
                     Debug.WriteLine($"\tColumn:{dict.Key.ToUTF8String()}, Value:{dict.Value.Value.ToUTF8String()}");
                 }
             }
+            _clientTransport.Close();
+        }
+
+        [Fact(DisplayName = "4.映射方式读写数据")]
+        public async void WriteReadWithMappingTest()
+        {
+            await _clientTransport.OpenAsync();
+
+            var cancel = new CancellationToken();
+
+            var range = Enumerable.Range(0, 100).ToList();
+            var batchs = range
+                .Select(t => new BatchMutation
+                {
+                    Row = t.ToUTF8Bytes(),
+                    Mutations = HbaseParser.ToMutations(new Student { Name = $"hsx{t}", Age = t })
+                })
+                .ToList()
+                ;
+
+            await _client.mutateRowsAsync(_table.ToUTF8Bytes(), batchs, null, cancel);
+
+            var students = (await _client.getRowsAsync(
+                _table.ToUTF8Bytes(),
+                range.Select(t => t.ToUTF8Bytes()).ToList(),
+                null,
+                cancel))
+                .Select(t => HbaseParser.ToReal<Student>(t))
+                .ToList();
+
+            Assert.Equal(students.Count, range.Count());
+            Assert.Equal(students.Last().Name, $"hsx{range.Last()}");
+            Assert.Equal(students.Last().Age, range.Last());
+
             _clientTransport.Close();
         }
     }

@@ -31,7 +31,8 @@ namespace HbaseNetCore
         [Fact]
         public void ToMutationTest()
         {
-            var mutaton = HbaseParser.ToMutation(_student);
+            var mutatons = HbaseParser.ToMutations(_student);
+            Assert.True(mutatons.Count > 0);
         }
 
         [Fact]
@@ -49,7 +50,7 @@ namespace HbaseNetCore
 
             };
             var student = HbaseParser.ToReal<Student>(tRow);
-            
+
             Assert.Equal(_student.Age, student.Age);
             Assert.Equal(_student.Name, student.Name);
             Assert.Equal(_student.isWork, student.isWork);
