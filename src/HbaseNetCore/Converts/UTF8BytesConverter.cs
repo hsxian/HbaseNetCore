@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Utilities.Converts
+namespace HbaseNetCore.Converts
 {
     public static class UTF8BytesConverter
     {
@@ -22,6 +22,7 @@ namespace Utilities.Converts
         {
             return Encoding.UTF8.GetString(@this);
         }
+
         public static T ToReal<T>(this byte[] @this)
         {
             var utf8str = Encoding.UTF8.GetString(@this);

@@ -1,6 +1,6 @@
 using System;
 
-namespace Utilities.Attributes
+namespace HbaseNetCore.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class HbaseTableAttribute : Attribute

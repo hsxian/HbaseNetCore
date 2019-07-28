@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
-using Utilities.Attributes;
-using Utilities.Converts;
+using HbaseNetCore.Attributes;
+using HbaseNetCore.Converts;
+using System.Threading.Tasks;
 
-namespace Utilities.Parsers
+namespace HbaseNetCore.Parsers
 {
     public class HbaseParser
     {
+        public async static Task<List<Mutation>> ToMutationsAsync(object obj)
+        {
+            return await Task.Run(() => { return ToMutations(obj); });
+        }
         public static List<Mutation> ToMutations(object obj)
         {
             var result = new List<Mutation>();
@@ -56,7 +61,10 @@ namespace Utilities.Parsers
             }
             return result;
         }
-
+        public async static Task<T> ToRealAsync<T>(TRowResult trr) where T : class, new()
+        {
+            return await Task.Run(() => { return ToReal<T>(trr); });
+        }
         public static T ToReal<T>(TRowResult trr) where T : class, new()
         {
             var real = new T();

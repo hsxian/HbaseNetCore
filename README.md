@@ -9,6 +9,13 @@ cd $HBASE_HOME
 ./bin/hbase thrift -b HadoopMaster -p 9090 start
 ```
 
+###　带有预分区的创建 table
+该版本的 api 暂未发现带有预分区的创建方法，所以手动创建（测试中有自动创建，如果不需要预分区，请忽略）：
+
+```shell
+hbase> create 'student', 'default', {SPLITS => ['0','1', '2', '3', '4','5','6','7','8','9']}
+```
+
 ## Gen Hbase.thrift
 
 thrift version=0.11.0

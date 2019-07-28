@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ThriftHbaseNetCore\ThriftHbaseNetCore.csproj" />
     <ProjectReference Include="..\..\src\Thrift\Thrift.csproj" />
-    <ProjectReference Include="..\..\src\Utilities\Utilities.csproj" />
+    <ProjectReference Include="..\..\src\HbaseNetCore\HbaseNetCore.csproj" />
   </ItemGroup>
 
 </Project>

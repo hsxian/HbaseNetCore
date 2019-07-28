@@ -1,6 +1,6 @@
 using System;
 
-namespace Utilities.Attributes
+namespace HbaseNetCore.Attributes
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class HbaseColumnAttribute : Attribute
