@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HbaseNetCore.Attributes;
+using HbaseNetCore.Interfaces;
+using HbaseNetCore.Utility;
 
 namespace HbaseNetCoreTest.Models
 {
-    [HbaseTable]
-    public class Student
+    [HbaseTable("student")]
+    public class Student : IHbaseTable
     {
+        public int id;
         [HbaseColumn]
         public string Name { get; set; }
         [HbaseColumn]
@@ -16,5 +20,10 @@ namespace HbaseNetCoreTest.Models
         public DateTime JoinSchool { get; set; }
         [HbaseColumn]
         public List<string> Hobbies { get; set; }
+
+        public string GenerateRowKey()
+        {
+            return id.ToString().Reverse2String();
+        }
     }
 }

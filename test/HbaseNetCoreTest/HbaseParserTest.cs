@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HbaseNetCore.Attributes;
 using HbaseNetCore.Converts;
+using HbaseNetCore.Interfaces;
 using HbaseNetCore.Parsers;
 using HbaseNetCoreTest.Models;
 using Xunit;
@@ -11,6 +12,7 @@ namespace HbaseNetCoreTest
     public class HbaseParserTest
     {
         private readonly Student _student;
+        private readonly IHbaseParser _HbaseParser;
         public HbaseParserTest()
         {
             _student = new Student
@@ -19,11 +21,12 @@ namespace HbaseNetCoreTest
                 Age = 5,
                 isWork = true
             };
+            _HbaseParser = new HbaseParser();
         }
         [Fact]
         public void ToMutationTest()
         {
-            var mutatons = HbaseParser.ToMutations(_student);
+            var mutatons = _HbaseParser.ToMutationsAsync(_student).Result;
             Assert.True(mutatons.Count > 0);
         }
 
@@ -41,7 +44,7 @@ namespace HbaseNetCoreTest
                 }
 
             };
-            var student = HbaseParser.ToReal<Student>(tRow);
+            var student = _HbaseParser.ToRealAsync<Student>(tRow).Result;
 
             Assert.Equal(_student.Age, student.Age);
             Assert.Equal(_student.Name, student.Name);
