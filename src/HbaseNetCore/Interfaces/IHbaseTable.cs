@@ -2,6 +2,6 @@ namespace HbaseNetCore.Interfaces
 {
     public interface IHbaseTable
     {
-        string GenerateRowKey();
+        string RowKey { get; set; }
     }
 }

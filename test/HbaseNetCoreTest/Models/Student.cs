@@ -10,7 +10,7 @@ namespace HbaseNetCoreTest.Models
     [HbaseTable("student")]
     public class Student : IHbaseTable
     {
-        public int id;
+        public string RowKey { get; set; }
         [HbaseColumn]
         public string Name { get; set; }
         [HbaseColumn]
@@ -20,10 +20,5 @@ namespace HbaseNetCoreTest.Models
         public DateTime JoinSchool { get; set; }
         [HbaseColumn]
         public List<string> Hobbies { get; set; }
-
-        public string GenerateRowKey()
-        {
-            return id.ToString().Reverse2String();
-        }
     }
 }

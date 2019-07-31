@@ -62,11 +62,15 @@ namespace HbaseNetCore.Parsers
             });
         }
 
-        public Task<T> ToRealAsync<T>(TRowResult trr) where T : class, new()
+        public Task<T> ToRealAsync<T>(TRowResult trr) where T : class, IHbaseTable, new()
         {
             return Task.Run(() =>
             {
-                var real = new T();
+                var real = new T
+                {
+                    RowKey = trr.Row.ToUTF8String()
+                };
+                
                 var type = real.GetType();
                 var fps = type.GetMembers()
                     .Where(t => t.MemberType == MemberTypes.Property || t.MemberType == MemberTypes.Field)
@@ -126,7 +130,7 @@ namespace HbaseNetCore.Parsers
         {
             var result = new BatchMutation
             {
-                Row = obj.GenerateRowKey().ToUTF8Bytes(),
+                Row = obj.RowKey.ToUTF8Bytes(),
                 Mutations = await ToMutationsAsync(obj)
             };
             return result;

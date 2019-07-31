@@ -7,7 +7,7 @@ namespace HbaseNetCore.Interfaces
     {
         Task<List<Mutation>> ToMutationsAsync<T>(T obj) where T : class;
         Task<BatchMutation> ToBatchMutationAsync<T>(T obj) where T : class, IHbaseTable;
-        Task<T> ToRealAsync<T>(TRowResult trr) where T : class, new();
+        Task<T> ToRealAsync<T>(TRowResult trr) where T : class, IHbaseTable, new();
 
     }
 }
