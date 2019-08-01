@@ -40,25 +40,57 @@ namespace HbaseNetCoreTest
         [Fact]
         public async void HbaseRWAllTest()
         {
-            await _clientTransport.OpenAsync();
-
-            await CreateTableTest();
-            int perCount = 1000;
+            var sth = new Stopwatch();
+            int perCount = 100000;
             int allCount = 0;
 
-            for (int i = 0; i < 10; i++)
+            await _clientTransport.OpenAsync();
+
+            sth.Start();
+            await DelectedTableTest();
+            Console.WriteLine($"{nameof(DelectedTableTest)},time: {sth.Elapsed}");
+
+            sth.Restart();
+            await CreateTableTest();
+            Console.WriteLine($"{nameof(CreateTableTest)},time: {sth.Elapsed}");
+
+
+
+            sth.Restart();
+            for (int i = 0; i < 1; i++)
             {
                 await WriteWithMappingTest(allCount, perCount);
                 allCount += perCount;
             }
+            Console.WriteLine($"{nameof(WriteWithMappingTest)},count: {allCount}, time: {sth.Elapsed}");
 
+            sth.Restart();
             await ReadWithMappingTest(allCount - 1);
+            Console.WriteLine($"{nameof(ReadWithMappingTest)},count: 1, time: {sth.Elapsed}");
 
+            sth.Restart();
             await ScanWithStartTest("8", allCount / 5);
+            Console.WriteLine($"{nameof(ScanWithStartTest)},count: {allCount / 5}, time: {sth.Elapsed}");
 
+            sth.Restart();
             await ScanWithStopTest("0", "3", 3 * allCount / 10);
+            Console.WriteLine($"{nameof(ScanWithStopTest)},count: {3 * allCount / 10}, time: {sth.Elapsed}");
 
             _clientTransport.Close();
+        }
+
+        private async Task DelectedTableTest()
+        {
+            var table = await _hbaseHelper.GetTableName<Student>();
+
+            var cancel = new CancellationToken();
+
+            var tables = await _client.getTableNamesAsync(cancel);
+
+            if (!tables.Select(t => t.ToUTF8String()).Contains(table)) return;
+
+            await _client.disableTableAsync(table.ToUTF8Bytes(), cancel);
+            await _client.deleteTableAsync(table.ToUTF8Bytes(), cancel);
         }
 
         private async Task CreateTableTest()
@@ -71,7 +103,7 @@ namespace HbaseNetCoreTest
 
             if (tables.Select(t => t.ToUTF8String()).Contains(table)) return;
 
-            var colNames = (await _hbaseHelper.GetTableColumnNames<Student>());
+            var colNames = await _hbaseHelper.GetTableColumnNames<Student>();
 
             var columnFamilies = colNames
                 .Select(t => new ColumnDescriptor { Name = t.ToUTF8Bytes() })
@@ -82,11 +114,12 @@ namespace HbaseNetCoreTest
             tables = await _client.getTableNamesAsync(cancel);
 
             Assert.Contains(tables, t => t.ToUTF8String() == table);
-
         }
         private async Task WriteWithMappingTest(int start, int count)
         {
-            var path = "count.ini";
+            var sth = new Stopwatch();
+            sth.Start();
+
             var table = await _hbaseHelper.GetTableName<Student>();
 
             var cancel = new CancellationToken();
@@ -97,15 +130,16 @@ namespace HbaseNetCoreTest
                 .ToList();
 
             students.Last().Hobbies = new List<string> { "running", "dance" };
-            students.Last().isWork = true;
+            students.Last().IsWork = true;
+            Console.WriteLine($"\tcreate class,count:{students.Count}, time: {sth.Elapsed}");
 
-            var batchs = students
-                .Select(t => _HbaseParser.ToBatchMutationAsync(t).Result)
-                .ToList();
+            sth.Restart();
+            var batchs = _HbaseParser.ToBatchMutations(students);
+            Console.WriteLine($"\tParser Class To BatchMutation Async,count:{batchs.Count}, time: {sth.Elapsed}");
 
+            sth.Restart();
             await _client.mutateRowsAsync(table.ToUTF8Bytes(), batchs, null, cancel);
-
-            await File.WriteAllTextAsync(path, (start + count).ToString());
+            Console.WriteLine($"\tmutateRowsAsync,count:{batchs.Count}, time: {sth.Elapsed}");
         }
 
         private async Task ReadWithMappingTest(int index)
@@ -119,13 +153,13 @@ namespace HbaseNetCoreTest
                 index.ToString().Reverse2String().ToUTF8Bytes(),
                 null,
                 cancel))
-                .Select(t => _HbaseParser.ToRealAsync<Student>(t).Result)
+                .Select(t => _HbaseParser.ToReal<Student>(t))
                 .ToList();
 
             Assert.True(studentsFromHb.Count > 0);
             Assert.Equal(studentsFromHb.Last().Name, $"hsx{index}");
             Assert.Equal(studentsFromHb.Last().Age, index);
-            Assert.True(studentsFromHb.Last().isWork);
+            Assert.True(studentsFromHb.Last().IsWork);
             Assert.Contains(studentsFromHb.Last().Hobbies, t => t == "running");
         }
         private async Task ScanWithStartTest(string start, int expectCount)
@@ -147,7 +181,7 @@ namespace HbaseNetCoreTest
             do
             {
                 var tRows = await _client.scannerGetListAsync(id, 500, cancel);
-                perStudents = tRows.Select(t => _HbaseParser.ToRealAsync<Student>(t).Result).ToList();
+                perStudents = _HbaseParser.ToReals<Student>(tRows);
                 students.AddRange(perStudents);
             } while (perStudents?.Count > 0);
 
@@ -175,7 +209,7 @@ namespace HbaseNetCoreTest
             do
             {
                 var tRows = await _client.scannerGetListAsync(id, 1000, cancel);
-                perStudents = tRows.Select(t => _HbaseParser.ToRealAsync<Student>(t).Result).ToList();
+                perStudents = _HbaseParser.ToReals<Student>(tRows);
                 students.AddRange(perStudents);
             } while (perStudents?.Count > 0);
 

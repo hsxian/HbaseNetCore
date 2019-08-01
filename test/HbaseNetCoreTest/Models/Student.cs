@@ -16,7 +16,7 @@ namespace HbaseNetCoreTest.Models
         [HbaseColumn]
         public int Age { get; set; }
         [HbaseColumn]
-        public bool? isWork;
+        public bool? IsWork { get; set; }
         public DateTime JoinSchool { get; set; }
         [HbaseColumn]
         public List<string> Hobbies { get; set; }

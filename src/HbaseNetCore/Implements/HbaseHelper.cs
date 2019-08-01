@@ -22,11 +22,12 @@ namespace HbaseNetCore.Implements
                     {
                         var att = t.GetCustomAttribute(hcaType) as HbaseColumnAttribute;
                         if (att == null) return null;
-                        if (string.IsNullOrWhiteSpace(att.Column))
+                        if (!string.IsNullOrWhiteSpace(att.Column))
                             return att.Column;
-                        return t.Name;
+                        return HbaseColumnAttribute.DefaultFamily;
                     })
                     .Where(t => t != null)
+                    .Distinct()
                     .ToList();
                 return cols;
             });

@@ -2,7 +2,7 @@ using System;
 
 namespace HbaseNetCore.Attributes
 {
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class HbaseColumnAttribute : Attribute
     {
         public const string DefaultFamily = "default";

@@ -19,14 +19,14 @@ namespace HbaseNetCoreTest
             {
                 Name = "hsx",
                 Age = 5,
-                isWork = true
+                IsWork = true
             };
             _HbaseParser = new HbaseParser();
         }
         [Fact]
         public void ToMutationTest()
         {
-            var mutatons = _HbaseParser.ToMutationsAsync(_student).Result;
+            var mutatons = _HbaseParser.ToMutations(_student);
             Assert.True(mutatons.Count > 0);
         }
 
@@ -40,15 +40,15 @@ namespace HbaseNetCoreTest
                 {
                     {$"{HbaseColumnAttribute.DefaultFamily}:{nameof(_student.Name)}".ToUTF8Bytes(),new TCell {Value=_student.Name.ToUTF8Bytes()}},
                     {$"{HbaseColumnAttribute.DefaultFamily}:{nameof(_student.Age)}".ToUTF8Bytes(),new TCell {Value=_student.Age.ToUTF8Bytes()}},
-                    {$"{HbaseColumnAttribute.DefaultFamily}:{nameof(_student.isWork)}".ToUTF8Bytes(),new TCell {Value=_student.isWork.ToUTF8Bytes()}},
+                    {$"{HbaseColumnAttribute.DefaultFamily}:{nameof(_student.IsWork)}".ToUTF8Bytes(),new TCell {Value=_student.IsWork.ToUTF8Bytes()}},
                 }
 
             };
-            var student = _HbaseParser.ToRealAsync<Student>(tRow).Result;
+            var student = _HbaseParser.ToReal<Student>(tRow);
 
             Assert.Equal(_student.Age, student.Age);
             Assert.Equal(_student.Name, student.Name);
-            Assert.Equal(_student.isWork, student.isWork);
+            Assert.Equal(_student.IsWork, student.IsWork);
         }
     }
 }
