@@ -56,7 +56,7 @@ namespace HbaseNetCore.Parsers
 
             var nameWithFamily = GetPropertyNameWithFamilyBytes<T>();
             var properties = typeof(T).GetProperties()
-                .Where(t => nameWithFamily.Keys.Contains(t.Name))
+                .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
 
             foreach (var property in properties)
@@ -93,7 +93,7 @@ namespace HbaseNetCore.Parsers
             var strType = typeof(string);
             var nameWithFamily = GetPropertyNameWithFamilyStr<T>();
             var properties = typeof(T).GetProperties()
-                .Where(t => nameWithFamily.Keys.Contains(t.Name))
+                .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
             var strTypes = properties.Where(t => t.PropertyType == strType).ToList();
             var noStrTypes = properties.Where(t => t.PropertyType != strType).ToList();
@@ -123,9 +123,8 @@ namespace HbaseNetCore.Parsers
         public List<BatchMutation> ToBatchMutations<T>(IEnumerable<T> objs) where T : class, IHbaseTable
         {
             var nameWithFamily = GetPropertyNameWithFamilyBytes<T>();
-            var names = nameWithFamily.Keys.ToList();
             var properties = typeof(T).GetProperties()
-                .Where(t => names.Contains(t.Name))
+                .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
 
             var result = new List<BatchMutation>();
@@ -137,7 +136,6 @@ namespace HbaseNetCore.Parsers
                     Row = obj.RowKey.ToUTF8Bytes(),
                     Mutations = new List<Mutation>()
                 };
-
                 foreach (var property in properties)
                 {
                     var v = property.GetValue(obj);
@@ -151,7 +149,6 @@ namespace HbaseNetCore.Parsers
                 }
                 result.Add(batch);
             }
-
             return result;
         }
 
@@ -160,7 +157,7 @@ namespace HbaseNetCore.Parsers
 
             var nameWithFamily = GetPropertyNameWithFamilyStr<T>();
             var properties = typeof(T).GetProperties()
-                .Where(t => nameWithFamily.Keys.Contains(t.Name))
+                .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
 
             var strType = typeof(string);

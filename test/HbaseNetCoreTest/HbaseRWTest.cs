@@ -41,7 +41,7 @@ namespace HbaseNetCoreTest
         public async void HbaseRWAllTest()
         {
             var sth = new Stopwatch();
-            int perCount = 100000;
+            int perCount = 1000;
             int allCount = 0;
 
             await _clientTransport.OpenAsync();
