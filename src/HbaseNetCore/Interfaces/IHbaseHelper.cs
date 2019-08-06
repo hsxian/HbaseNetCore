@@ -6,7 +6,7 @@ namespace HbaseNetCore.Interfaces
 {
     public interface IHbaseHelper
     {
-        Task<string> GetTableName<T>() where T : class, new();
-        Task<List<string>> GetTableColumnNames<T>() where T : class, new();
+        string GetTableName<T>() where T : class, new();
+        List<string> GetTableColumnNames<T>() where T : class, new();
     }
 }

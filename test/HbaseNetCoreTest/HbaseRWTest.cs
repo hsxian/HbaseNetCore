@@ -41,7 +41,7 @@ namespace HbaseNetCoreTest
         public async void HbaseRWAllTest()
         {
             var sth = new Stopwatch();
-            int perCount = 1000;
+            int perCount = 10000;
             int allCount = 0;
 
             await _clientTransport.OpenAsync();
@@ -81,46 +81,46 @@ namespace HbaseNetCoreTest
 
         private async Task DelectedTableTest()
         {
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             var cancel = new CancellationToken();
 
             var tables = await _client.getTableNamesAsync(cancel);
 
-            if (!tables.Select(t => t.ToUTF8String()).Contains(table)) return;
+            if (!tables.Select(t => t.ToObject<string>()).Contains(table)) return;
 
-            await _client.disableTableAsync(table.ToUTF8Bytes(), cancel);
-            await _client.deleteTableAsync(table.ToUTF8Bytes(), cancel);
+            await _client.disableTableAsync(table.ToBytes(), cancel);
+            await _client.deleteTableAsync(table.ToBytes(), cancel);
         }
 
         private async Task CreateTableTest()
         {
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             var cancel = new CancellationToken();
 
             var tables = await _client.getTableNamesAsync(cancel);
 
-            if (tables.Select(t => t.ToUTF8String()).Contains(table)) return;
+            if (tables.Select(t => t.ToObject<string>()).Contains(table)) return;
 
-            var colNames = await _hbaseHelper.GetTableColumnNames<Student>();
+            var colNames = _hbaseHelper.GetTableColumnNames<Student>();
 
             var columnFamilies = colNames
-                .Select(t => new ColumnDescriptor { Name = t.ToUTF8Bytes() })
+                .Select(t => new ColumnDescriptor { Name = t.ToBytes() })
                 .ToList();
 
-            await _client.createTableAsync(table.ToUTF8Bytes(), columnFamilies, cancel);
+            await _client.createTableAsync(table.ToBytes(), columnFamilies, cancel);
 
             tables = await _client.getTableNamesAsync(cancel);
 
-            Assert.Contains(tables, t => t.ToUTF8String() == table);
+            Assert.Contains(tables, t => t.ToObject<string>() == table);
         }
         private async Task WriteWithMappingTest(int start, int count)
         {
             var sth = new Stopwatch();
             sth.Start();
 
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             var cancel = new CancellationToken();
 
@@ -138,19 +138,19 @@ namespace HbaseNetCoreTest
             Console.WriteLine($"\tParser Class To BatchMutation Async,count:{batchs.Count}, time: {sth.Elapsed}");
 
             sth.Restart();
-            await _client.mutateRowsAsync(table.ToUTF8Bytes(), batchs, null, cancel);
+            await _client.mutateRowsAsync(table.ToBytes(), batchs, null, cancel);
             Console.WriteLine($"\tmutateRowsAsync,count:{batchs.Count}, time: {sth.Elapsed}");
         }
 
         private async Task ReadWithMappingTest(int index)
         {
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             var cancel = new CancellationToken();
 
             var studentsFromHb = (await _client.getRowAsync(
-                table.ToUTF8Bytes(),
-                index.ToString().Reverse2String().ToUTF8Bytes(),
+                table.ToBytes(),
+                index.ToString().Reverse2String().ToBytes(),
                 null,
                 cancel))
                 .Select(t => _HbaseParser.ToReal<Student>(t))
@@ -164,15 +164,15 @@ namespace HbaseNetCoreTest
         }
         private async Task ScanWithStartTest(string start, int expectCount)
         {
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             start = start.Reverse2String();
 
             var cancel = new CancellationToken();
 
             var id = await _client.scannerOpenAsync(
-                table.ToUTF8Bytes(),
-                start.ToUTF8Bytes(),
+                table.ToBytes(),
+                start.ToBytes(),
                 null,
                 null,
                 cancel);
@@ -190,7 +190,7 @@ namespace HbaseNetCoreTest
         }
         private async Task ScanWithStopTest(string start, string end, int expectCount)
         {
-            var table = await _hbaseHelper.GetTableName<Student>();
+            var table = _hbaseHelper.GetTableName<Student>();
 
             start = start.Reverse2String();
             end = end.Reverse2String();
@@ -198,9 +198,9 @@ namespace HbaseNetCoreTest
             var cancel = new CancellationToken();
 
             var id = await _client.scannerOpenWithStopAsync(
-                table.ToUTF8Bytes(),
-                start.ToUTF8Bytes(),
-                end.ToUTF8Bytes(),
+                table.ToBytes(),
+                start.ToBytes(),
+                end.ToBytes(),
                 null,
                 null,
                 cancel);

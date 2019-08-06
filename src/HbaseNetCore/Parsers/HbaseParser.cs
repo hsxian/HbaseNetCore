@@ -8,11 +8,13 @@ using HbaseNetCore.Converts;
 using System.Threading.Tasks;
 using HbaseNetCore.Interfaces;
 using System.Collections.Concurrent;
+using HbaseNetCore.Utility;
 
 namespace HbaseNetCore.Parsers
 {
     public class HbaseParser : IHbaseParser
     {
+
         public Dictionary<string, string> GetPropertyNameWithFamilyStr<T>() where T : class
         {
             var hcaType = typeof(HbaseColumnAttribute);
@@ -46,7 +48,7 @@ namespace HbaseNetCore.Parsers
             var strDic = GetPropertyNameWithFamilyStr<T>();
             foreach (var item in strDic)
             {
-                result.Add(item.Key, item.Value.ToUTF8Bytes());
+                result.Add(item.Key, item.Value.ToBytes());
             }
             return result;
         }
@@ -66,7 +68,7 @@ namespace HbaseNetCore.Parsers
                 var mut = new Mutation
                 {
                     Column = nameWithFamily[property.Name],
-                    Value = v.ToUTF8Bytes()
+                    Value = v.ToBytes()
                 };
                 result.Add(mut);
             }
@@ -77,7 +79,7 @@ namespace HbaseNetCore.Parsers
         {
             var result = new BatchMutation
             {
-                Row = obj.RowKey.ToUTF8Bytes(),
+                Row = obj.RowKey.ToBytes(),
                 Mutations = ToMutations(obj)
             };
             return result;
@@ -87,34 +89,22 @@ namespace HbaseNetCore.Parsers
         {
             var real = new T
             {
-                RowKey = trr.Row.ToUTF8String()
+                RowKey = trr.Row.ToObject<string>()
             };
 
-            var strType = typeof(string);
             var nameWithFamily = GetPropertyNameWithFamilyStr<T>();
             var properties = typeof(T).GetProperties()
                 .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
-            var strTypes = properties.Where(t => t.PropertyType == strType).ToList();
-            var noStrTypes = properties.Where(t => t.PropertyType != strType).ToList();
 
-            var dict = trr.Columns.ToDictionary(t => t.Key.ToUTF8String());
+            var dict = trr.Columns.ToDictionary(t => t.Key.ToObject<string>());
 
-            foreach (var property in noStrTypes)
+            foreach (var property in properties)
             {
                 if (dict.TryGetValue(nameWithFamily[property.Name], out var tCell))
                 {
-                    var vlaueStr = tCell.Value.Value.ToUTF8String();
-                    object v = JsonConvert.DeserializeObject(vlaueStr, property.PropertyType);
+                    object v = tCell.Value.Value.ToObject(property.PropertyType);
                     property.SetValue(real, v);
-                }
-            }
-            foreach (var property in strTypes)
-            {
-                if (dict.TryGetValue(nameWithFamily[property.Name], out var tCell))
-                {
-                    var vlaueStr = tCell.Value.Value.ToUTF8String();
-                    property.SetValue(real, vlaueStr);
                 }
             }
             return real;
@@ -133,7 +123,7 @@ namespace HbaseNetCore.Parsers
             {
                 var batch = new BatchMutation
                 {
-                    Row = obj.RowKey.ToUTF8Bytes(),
+                    Row = obj.RowKey.ToBytes(),
                     Mutations = new List<Mutation>()
                 };
                 foreach (var property in properties)
@@ -143,7 +133,7 @@ namespace HbaseNetCore.Parsers
                     var mut = new Mutation
                     {
                         Column = nameWithFamily[property.Name],
-                        Value = v.ToUTF8Bytes()
+                        Value = v.ToBytes()
                     };
                     batch.Mutations.Add(mut);
                 }
@@ -160,35 +150,20 @@ namespace HbaseNetCore.Parsers
                 .Where(t => nameWithFamily.ContainsKey(t.Name))
                 .ToList();
 
-            var strType = typeof(string);
-            var strTypes = properties.Where(t => t.PropertyType == strType).ToList();
-            var noStrTypes = properties.Where(t => t.PropertyType != strType).ToList();
-
             var result = new List<T>();
             foreach (var trr in trrs)
             {
                 var real = new T
                 {
-                    RowKey = trr.Row.ToUTF8String()
+                    RowKey = trr.Row.ToObject<string>()
                 };
-                var dict = trr.Columns.ToDictionary(t => t.Key.ToUTF8String());
-
-                foreach (var property in noStrTypes)
+                var dict = trr.Columns.ToDictionary(t => t.Key.ToObject<string>());
+                foreach (var property in properties)
                 {
                     if (dict.TryGetValue(nameWithFamily[property.Name], out var tCell))
                     {
-                        var vlaueStr = tCell.Value.Value.ToUTF8String();
-                        object v = JsonConvert.DeserializeObject(vlaueStr, property.PropertyType);
+                        object v = tCell.Value.Value.ToObject(property.PropertyType);
                         property.SetValue(real, v);
-                    }
-                }
-
-                foreach (var property in strTypes)
-                {
-                    if (dict.TryGetValue(nameWithFamily[property.Name], out var tCell))
-                    {
-                        var vlaueStr = tCell.Value.Value.ToUTF8String();
-                        property.SetValue(real, vlaueStr);
                     }
                 }
                 result.Add(real);
