@@ -2,7 +2,7 @@
 
 ## Preparation for hbase
 
-hbase version=1.2.8。版本 1.0.9 下也可使用。推测 1.2.8 以下可正常使用。高版本目前无法得知。
+hbase version=1.2.8。版本 0.9.0 下也可使用。推测 1.2.8 以下可正常使用。高版本目前无法得知。
 
 ```bash
 cd $HBASE_HOME
@@ -20,10 +20,6 @@ hbase> create 'student', 'default', {SPLITS => ['1', '2', '3', '4','5','6','7','
 ## Gen Hbase.thrift
 
 thrift version=0.11.0，可以不用安装。
-
-```bash
-thrift --gen netcore Hbase.thrift
-```
 
 ## 特性
 

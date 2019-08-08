@@ -33,7 +33,7 @@ namespace HbaseNetCore.Converts
                 case long @long:
                     return BitConverter.GetBytes(@long).ReverseBytes();
                 case bool @bool:
-                    return BitConverter.GetBytes(@bool).ReverseBytes();
+                    return BitConverter.GetBytes(@bool);
                 case float @float:
                     return BitConverter.GetBytes(@float).ReverseBytes();
                 //在Java中char使用Unicode码，是四字节的。但在csharp中为两个字节

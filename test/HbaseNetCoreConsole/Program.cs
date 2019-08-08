@@ -4,6 +4,7 @@ using System.Linq;
 using HbaseNetCore.Parsers;
 using HbaseNetCoreTest;
 using HbaseNetCoreTest.Models;
+using HbaseNetCore.Converts;
 
 namespace HbaseNetCoreConsole
 {
@@ -11,7 +12,6 @@ namespace HbaseNetCoreConsole
     {
         static void Main(string[] args)
         {
-            var s = typeof(Int32?).Name;
             // var sth = new Stopwatch();
             // sth.Start();
             // var range = Enumerable.Range(0, 1000).ToList();
